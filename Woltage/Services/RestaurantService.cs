@@ -24,9 +24,6 @@ namespace Woltage.Services
         {
             var url = $"https://consumer-api.wolt.com/v1/pages/restaurants?lat={Convert.ToDouble(lat, System.Globalization.CultureInfo.GetCultureInfo("en-US"))}&lon={Convert.ToDouble(lon, System.Globalization.CultureInfo.GetCultureInfo("en-US"))}";
 
-            //fuck doubles, these fuckers have commans
-            url = url.Replace(",", ".");
-
             var result = CallServerService.Get<RestaurantOverview>(url);
 
             result.Sections[1].Items = result.Sections[1].Items.Where(x => x.Venue.Delivers && x.Venue.Online).ToList();
