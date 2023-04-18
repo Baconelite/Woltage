@@ -8,26 +8,28 @@ namespace Woltage
     {
         public static void Main(string[] args)
         {
-            Console.WriteLine("Woltage v0.5");
             Start();
         }
 
         public static void Start() 
         {
             RestaurantService restaurantService = new();
-            IOService ioService = new();
+            TerminalService terminalService = new();
 
-            Console.WriteLine("Enter search terms separated by comma");
+            terminalService.Print("assets/logo.txt", ConsoleColor.DarkYellow);
+            //terminalService.Print("assets/woltage.txt", ConsoleColor.DarkBlue);
+            terminalService.Print("assets/search.txt");
+
             var terms = Console.ReadLine();
 
             if (terms.Equals("refresh"))
             {
-                RefreshRestaurants(restaurantService, ioService);
+                RefreshRestaurants(restaurantService);
             }
 
-            var results = GetRestaurantResults(restaurantService, ioService, terms.Split(','));
+            var results = restaurantService.GetRestaurantResults(terms.Split(','));
 
-            DisplayRestaurants(results);
+            terminalService.DisplayRestaurants(results);
 
             Console.WriteLine("Search again? y/n");
             var response = Console.ReadLine();
@@ -39,68 +41,19 @@ namespace Woltage
             }
         }
 
-        private static List<RestaurantResultModel> GetRestaurantResults(RestaurantService restaurantService, IOService ioService, string[] terms)
-        {
-            var restaurants = ioService.ReadFromFile<List<Restaurant>>("RestaurantsResults.txt");
-            var filteredRestaurants = restaurantService.FilterRestaurantItemsByName(restaurants, terms);
-
-            var restaurauntResults = restaurantService.SortRestaurantsByCheapest(filteredRestaurants, 20);
-
-            return restaurauntResults;
-        }
-
-        public static void RefreshRestaurants(RestaurantService restaurantService, IOService ioService)
+        public static void RefreshRestaurants(RestaurantService restaurantService)
         {
             Console.WriteLine($"Refreshing restaurants.. this will take some time");
 
-            var configs = ioService.ReadFromFile<List<Config>>("config.txt");
+            var count = restaurantService.RefreshRestaurants();
 
-            var overview = restaurantService.GetRestaurantsOverview(configs.Find(x => x.Name.Equals("latitude")).Value, configs.Find(x => x.Name.Equals("longitude")).Value);
-            ioService.WriteToFile(JsonConvert.SerializeObject(overview), "OverviewResults.txt");
-
-            var restaurants = restaurantService.GetAllRestaurants(overview);
-
-            ioService.WriteToFile(JsonConvert.SerializeObject(restaurants), "RestaurantsResults.txt");
-
-            Console.WriteLine($"Refreshed {restaurants.Count} restaurants!");
-            Console.WriteLine($"Restarting Woltage in 10 seconds...");
+            Console.WriteLine($"Refreshed {count} restaurants!");
+            Console.WriteLine($"Restarting Woltage in 5 seconds...");
 
             Thread.Sleep(5000);
 
             Console.Clear();
             Start();
-        }
-
-        public static void DisplayRestaurants(List<RestaurantResultModel> restaurants)
-        {
-            //Console.ForegroundColor = ConsoleColor.DarkGreen;
-
-            Console.WriteLine(" ---------------------------------------------------------------------------------------------- ");
-            Console.WriteLine("|             Restaurant             |                 Rettens navn                | pris (kr) |");
-            Console.WriteLine(" ---------------------------------------------------------------------------------------------- ");
-
-            Random random = new Random();
-
-            foreach (var restaurant in restaurants)
-            {
-                Thread.Sleep(random.Next(30, 200)); //idk I like it
-
-                if (restaurant == null || restaurant.RestaurantName == null || restaurant.ItemName == null) continue;
-
-                var restaurantName = restaurant.RestaurantName;
-
-                var itemName = restaurant.ItemName;
-
-                for (int i = restaurantName.Length; i < 35; i++)
-                    restaurantName += " ";
-
-                for (int k = itemName.Length; k < 43; k++)
-                    itemName += " ";
-
-                Console.WriteLine($"| {restaurantName}| {itemName} | {restaurant.ItemPrice} kr.    |");
-            }
-
-            //Console.ForegroundColor = ConsoleColor.Gray;
         }
     }
 }

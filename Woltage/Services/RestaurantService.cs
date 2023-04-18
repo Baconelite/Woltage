@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
@@ -13,16 +14,18 @@ namespace Woltage.Services
     {
 
         private CallServerService CallServerService { get; set; }
+        private IOService IOService { get; set; }
 
         public RestaurantService()
         {
             CallServerService = new CallServerService();
+            IOService = new IOService();
         }
 
 
         public RestaurantOverview GetRestaurantsOverview(string lat, string lon)
         {
-            var url = $"https://consumer-api.wolt.com/v1/pages/restaurants?lat={Convert.ToDouble(lat, System.Globalization.CultureInfo.GetCultureInfo("en-US"))}&lon={Convert.ToDouble(lon, System.Globalization.CultureInfo.GetCultureInfo("en-US"))}";
+            var url = $"https://consumer-api.wolt.com/v1/pages/restaurants?lat={lat}&lon={lon}";
 
             var result = CallServerService.Get<RestaurantOverview>(url);
 
@@ -65,7 +68,7 @@ namespace Woltage.Services
         {
             foreach (var restaurant in restaurants)
             {
-                if(restaurant == null || restaurant.Id == null) continue;
+                if (restaurant == null || restaurant.Id == null) continue;
 
                 var items = new List<RestaurantItem>();
 
@@ -81,7 +84,7 @@ namespace Woltage.Services
 
         public RestaurantOverview FilterRestaurantOverviewByTag(RestaurantOverview overview, string[] tags = null)
         {
-            if(tags == null)
+            if (tags == null)
                 return overview;
 
             if (overview == null || overview.Sections == null || overview.Sections[1] == null || overview.Sections[1].Items == null)
@@ -108,7 +111,7 @@ namespace Woltage.Services
         public List<RestaurantResultModel> SortRestaurantsByCheapest(List<Restaurant> restaurants, int minimumPrice)
         {
             List<RestaurantResultModel> result = new List<RestaurantResultModel>();
-            foreach(var restaurant in restaurants)
+            foreach (var restaurant in restaurants)
             {
                 if (restaurant.Items == null || !restaurant.Items.Any())
                     continue;
@@ -123,11 +126,34 @@ namespace Woltage.Services
                 model.ItemName = itemName;
                 model.ItemPrice = itemPrice;
 
-                if(model.ItemPrice > minimumPrice)
+                if (model.ItemPrice > minimumPrice)
                     result.Add(model);
             }
 
             return result.OrderBy(x => x.ItemPrice).ToList();
+        }
+
+        public int RefreshRestaurants()
+        {
+            var configs = IOService.ReadFromFile<List<Config>>("configs/config.txt");
+
+            var overview = GetRestaurantsOverview(configs.Find(x => x.Name.Equals("latitude")).Value, configs.Find(x => x.Name.Equals("longitude")).Value);
+            IOService.WriteToFile(JsonConvert.SerializeObject(overview), "OverviewResults.txt");
+
+            var restaurants = GetAllRestaurants(overview);
+            IOService.WriteToFile(JsonConvert.SerializeObject(restaurants), "RestaurantsResults.txt");
+
+            return restaurants.Count;
+        }
+
+        public List<RestaurantResultModel> GetRestaurantResults(string[] terms)
+        {
+            var restaurants = IOService.ReadFromFile<List<Restaurant>>("RestaurantsResults.txt");
+            var filteredRestaurants = FilterRestaurantItemsByName(restaurants, terms);
+
+            var restaurauntResults = SortRestaurantsByCheapest(filteredRestaurants, 20);
+
+            return restaurauntResults;
         }
     }
 }

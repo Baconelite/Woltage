@@ -11,7 +11,7 @@ namespace Woltage.Services
     {
         public void WriteToFile(string text, string fileName)
         {
-            string filePath = Path.Combine(Directory.GetCurrentDirectory(), fileName);
+            string filePath = $"{Directory.GetCurrentDirectory()}/{fileName}";
             // Check if the file already exists
             if (File.Exists(filePath))
             {
@@ -28,7 +28,7 @@ namespace Woltage.Services
 
         public T ReadFromFile<T>(string fileName)
         {
-            string filePath = Path.Combine(Directory.GetCurrentDirectory(), fileName);
+            string filePath = $"{Directory.GetCurrentDirectory()}/{fileName}";
 
             // Check if the file exists
             if (!File.Exists(filePath))
@@ -41,6 +41,30 @@ namespace Woltage.Services
             T obj = JsonConvert.DeserializeObject<T>(json);
 
             return obj;
+        }
+
+        public List<string> ReadLinesFromFile(string fileName)
+        {
+            string filePath = $"{Directory.GetCurrentDirectory()}/{fileName}";
+            List<string> lines = new List<string>();
+
+            try
+            {
+                using (StreamReader sr = new StreamReader(filePath))
+                {
+                    string line;
+                    while ((line = sr.ReadLine()) != null)
+                    {
+                        lines.Add(line);
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
+
+            return lines;
         }
     }
 }
