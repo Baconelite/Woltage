@@ -1,1 +1,0 @@
-[{"Name":"latitude","Value":"55.68311888415391"},{"Name":"longitude","Value":"12.53212172538042"}]
