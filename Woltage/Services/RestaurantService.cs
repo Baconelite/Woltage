@@ -58,7 +58,11 @@ namespace Woltage.Services
                 var restaurant = GetRestaurant(slug);
 
                 if (restaurant != null)
+                {
+                    restaurant.Slug = slug;
+                    restaurant.DeliveryPrice = overviewItem.Venue.DeliveryPriceInt;
                     restaurants.Add(restaurant);
+                }
             }
 
             return restaurants;
@@ -125,6 +129,7 @@ namespace Woltage.Services
                 model.RestaurantName = name;
                 model.ItemName = itemName;
                 model.ItemPrice = itemPrice;
+                model.DeliveryPrice = restaurant.DeliveryPrice / 100;
 
                 if (model.ItemPrice > minimumPrice)
                     result.Add(model);

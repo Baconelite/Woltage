@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Woltage.Models;
+﻿using Woltage.Models;
+using System;
 
 namespace Woltage.Services
 {
@@ -21,9 +17,9 @@ namespace Woltage.Services
 
         public void DisplayRestaurants(List<RestaurantResultModel> restaurants)
         {
-            Console.WriteLine(" ---------------------------------------------------------------------------------------------- ");
-            Console.WriteLine("|             Restaurant             |                 Rettens navn                | pris (kr) |");
-            Console.WriteLine(" ---------------------------------------------------------------------------------------------- ");
+            Console.WriteLine(" -----------------------------------------------------------------------------------------------------------");
+            Console.WriteLine("|             Restaurant             |                 Rettens navn                |   pris   |  Lev. Pris  |");
+            Console.WriteLine(" -----------------------------------------------------------------------------------------------------------");
 
             foreach (var restaurant in restaurants)
             {
@@ -33,14 +29,41 @@ namespace Woltage.Services
 
                 var itemName = restaurant.ItemName;
 
-                for (int i = restaurantName.Length; i < 35; i++)
-                    restaurantName += " ";
+                var itemPrice = restaurant.ItemPrice.ToString() + " kr.";
 
-                for (int k = itemName.Length; k < 43; k++)
-                    itemName += " ";
+                var deliveryPrice = restaurant.DeliveryPrice.ToString() + " kr.";
 
-                Console.WriteLine($"| {restaurantName}| {itemName} | {restaurant.ItemPrice} kr.    |");
+                if(restaurantName.Length > 34)
+                {
+                    restaurantName = string.Concat(restaurantName.AsSpan(0, 32), ".. ");
+                }
+                else
+                {
+                    for (int i = restaurantName.Length; i < 35; i++)
+                        restaurantName += " ";
+                }
+
+                if(itemName.Length > 42)
+                {
+                    itemName = string.Concat(itemName.AsSpan(0, 40), ".. ");
+                }
+                else
+                {
+                    for (int j = itemName.Length; j < 43; j++)
+                        itemName += " ";
+                }
+
+                for (int k = itemPrice.Length; k < 8; k++)
+                    itemPrice += " ";
+
+                for(int l = deliveryPrice.Length; l < 9; l++)
+                    deliveryPrice += " ";
+
+                Console.WriteLine($"| {restaurantName}| {itemName} |  {itemPrice}|    {deliveryPrice}|");
             }
+            Console.WriteLine();
+            Console.WriteLine($"{restaurants.Count} Results!");
+            Console.WriteLine();
         }
 
         public void Print(string path, ConsoleColor color = ConsoleColor.Gray)

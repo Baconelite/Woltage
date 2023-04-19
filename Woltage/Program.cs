@@ -8,6 +8,7 @@ namespace Woltage
     {
         public static void Main(string[] args)
         {
+            Console.Title = "Woltage v0.6";
             Start();
         }
 

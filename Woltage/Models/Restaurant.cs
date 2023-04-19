@@ -56,6 +56,12 @@ namespace Woltage.Models
 
         [JsonProperty("name")]
         public string? Name { get; set; }
+
+        [JsonProperty("slug")]
+        public string? Slug { get; set; }
+
+        [JsonProperty("delivery_price_int")]
+        public int? DeliveryPrice { get; set; }
     }
 
 }

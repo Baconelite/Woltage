@@ -1,5 +1,5 @@
-                             --------------------------------------
-                                       Enter search terms
-					 split by comma
-				     ex: pita,kebab,shawarma
-                             --------------------------------------
+                                      --------------------------------------
+                                                Enter search terms
+        			       	          split by comma
+        				      ex: pita,kebab,shawarma
+                                      --------------------------------------
